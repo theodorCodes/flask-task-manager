@@ -1,31 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block content %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Manager</title>
-</head>
+<h2>I'm extending the base template!</h2>
 
-<body>
-  <!--
-    Here we're using the Jinja templating language to loop 
-    through each task item from within our collection. -->
-  {% for task in tasks %}
-  <!-- Within our for-loop, we're just going to display 
-        the contents of each field that's in our database
-        currently. 
-        The iteration on this for-loop uses this new variable 
-        we created called 'task', and then
-        we'll use dot-notation to target each field. -->
-  {{ task.task_name }}<br>
-  {{ task.category_name }}<br>
-  {{ task.task_description }}<br>
-  {{ task.is_urgent }}<br>
-  {{ task.due_date }}<br>
-  <!-- It's alway good to supply any closing tags
-    up-front, to avoid possible errors on the page. -->
-  {% endfor %}
-</body>
+{% for task in tasks %}
+{{ task.task_name }}<br>
+{{ task.category_name }}<br>
+{{ task.task_description }}<br>
+{{ task.is_urgent }}<br>
+{{ task.due_date }}<br>
+{% endfor %}
 
-</html>
+{% endblock %}
