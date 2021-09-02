@@ -6,24 +6,51 @@
     <div class="row card-panel grey lighten-5">
         <form class="col s12" method="POST" action="{{ url_for('edit_task', task_id=task._id) }}">
             <!-- category selection -->
-			<div class="row">
-				<div class="input-field col s12">
+            <div class="row">
+                <div class="input-field col s12">
                     <i class="fas fa-folder-open prefix light-blue-text text-darken-4"></i>
-					<select id="category_name" name="category_name" class="validate" required>
-                        <option value="" disabled selected>Choose Category</option>
+                    <!-- We'll start with the <select> element for the task category name. -->
+                    <select id="category_name" name="category_name" class="validate" required>
+                        <!-- Since we're updating a task, there should always be a task name, 
+                        so we can remove the 'selected' attribute on our disabled option -->
+                        <option value="" disabled>Choose Category</option>
                         {% for category in categories %}
-                            <option value="{{ category.category_name }}">{{ category.category_name }}</option>
+                            <!-- Currently we're looping over all categories, 
+                            but we need to conditionally check the existing
+                            category from the database -->
+                            <!-- If the for-loop category's name is equal to our task's category name, 
+                            then we'll select that as the default -->
+                            {% if category.category_name == task.category_name %}
+                                <!-- If the category iteration of names does match that 
+                                from our task category name, then we'll apply the 'selected' 
+                                attribute. -->
+                                <option value="{{ category.category_name }}" selected>
+                                    {{- category.category_name -}}
+                                </option>
+                            <!-- The 'else' statement will be for all other options, not selected -->
+                            {% else %}
+                                <!-- Copy the option element from our 'else' statement, 
+                                and paste it within the conditional 'if' statement above -->
+                                <option value="{{ category.category_name }}">
+                                    {{- category.category_name -}}
+                                </option>
+                            <!-- Don't forget to close the 'endif' as well -->
+                            {% endif %}
                         {% endfor %}
                     </select>
-					<label for="category_name">Task Category</label>
-				</div>
-			</div>
+                    <label for="category_name">Task Category</label>
+                </div>
+            </div>
             <!-- task name -->
             <div class="row">
                 <div class="input-field col s12">
                     <i class="fas fa-pencil-alt prefix light-blue-text text-darken-4"></i>
+                    <!-- Next, we'll work with the Task Name. 
+                    Input fields are much easier to work with.
+                    All we need to do, is include the value="" attribute, 
+                    which will be set to our task variable's task_name --> 
                     <input id="task_name" name="task_name" minlength="5" maxlength="50"
-                        type="text" class="validate" required>
+                        value="{{ task.task_name }}" type="text" class="validate" required>
                     <label for="task_name">Task Name</label>
                 </div>
             </div>
@@ -31,8 +58,16 @@
             <div class="row">
                 <div class="input-field col s12">
                     <i class="fas fa-align-left prefix light-blue-text text-darken-4"></i>
+                    <!-- For <textarea> elements, we need to pass the task variable 
+                    'task.task_description' into the tags directly, 
+                    between the opening and closing tags.
+                    Actually, let me show you a quick trick.
+                    Make sure the variable and tags are all together, 
+                    not separated by a new line. -->
                     <textarea id="task_description" name="task_description" minlength="5"
-                        maxlength="200" class="materialize-textarea validate" required></textarea>
+                        maxlength="200" class="materialize-textarea validate" required>
+                        {{- task.task_description -}}
+                    </textarea>
                     <label for="task_description">Task Description</label>
                 </div>
             </div>
@@ -40,26 +75,60 @@
             <div class="row">
                 <div class="input-field col s12">
                     <i class="fas fa-calendar-alt prefix light-blue-text text-darken-4"></i>
-                    <input id="due_date" name="due_date" type="text" class="datepicker validate" required>
+                    <!-- Next on our list, is the task due date.
+                    It's a standard input element, so we can just insert the value="" attribute.
+                    The value will be our current task variable's due_date.
+                    Save the file, and let's make sure that loads fine on the live site -->
+                    <input id="due_date" name="due_date" type="text" 
+                           value="{{ task.due_date }}" class="datepicker validate" required>
                     <label for="due_date">Due Date</label>
                 </div>
             </div>
             <!-- is urgent toggle -->
-			<div class="row">
-				<div class="input-field col s12">
-					<div class="switch">
+            <div class="row">
+                <div class="input-field col s12">
+                    <div class="switch">
                         <i class="fas fa-exclamation-circle prefix light-blue-text text-darken-4"></i>
-						<label for="is_urgent">
-                            <input type="checkbox" id="is_urgent" name="is_urgent">
+                        <label for="is_urgent">
+                            <!-- Similar to the conditional check that we did on our 
+                            category dropdown, we need to apply the same for our toggle.
+                            Just above the input element, we'll check to see if the task's 
+                            is_urgent field is set to 'on'. -->
+                            {% if task.is_urgent == "on" %}
+                                <!-- Since this is just a styled checkbox, 
+                                all we need to do is include the 'checked' attribute if it's 'on'-->
+                                <input type="checkbox" id="is_urgent" name="is_urgent" checked>
+                            <!-- Go ahead and include the 'else' statement, 
+                            which will be our default 'off' state -->
+                            {% else %}
+                                <!-- Copy the input element, and let's paste it inside of 
+                                the if-statement for being 'on' above -->
+                                <input type="checkbox" id="is_urgent" name="is_urgent">
+                            <!-- After that, let's be sure to close the 'endif' block. -->
+                            {% endif %}
+                            <!-- You'll notice, however, we have a linting error above for duplicate IDs.
+                            That's perfectly fine, only one of these will actually be rendered on the page,
+                            depending on our conditional check. -->
                             <span class="lever"></span>
                             Is Urgent
                         </label>
-					</div>
-				</div>
-			</div>
+                    </div>
+                </div>
+             </div>
             <!-- submit button -->
             <div class="row">
                 <div class="col s12 center-align">
+                    <!-- adding cancel button here -->
+                    <!-- Just above our button to submit the edits, 
+                    let's include a button to cancel all changes.
+                    This time, though, we need to use an anchor tag with an href, 
+                    so that we can call one of our Python functions directly. 
+                    To keep things simple, this cancel button will go back to our 
+                    home page and get all tasks. The button will read 'Cancel', 
+                    and contain an icon to the right. -->
+                    <a href="{{ url_for('get_tasks') }}" class="btn-large red text-shadow">
+                        Cancel <i class="fas fa-times-circle right"></i>
+                    </a>
                     <button type="submit" class="btn-large light-blue darken-1 text-shadow">
                         Edit Task <i class="fas fa-edit right"></i>
                     </button>
