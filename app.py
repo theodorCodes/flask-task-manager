@@ -18,14 +18,16 @@ app.secret_key = os.environ.get("SECRET_KEY")
 mongo = PyMongo(app)
 
 
+# Route directory
 @app.route("/")
-# Read
+# Task - get task
 @app.route("/get_tasks")
 def get_tasks():
     tasks = list(mongo.db.tasks.find())
     return render_template("tasks.html", tasks=tasks)
 
 
+# User - register
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -52,6 +54,7 @@ def register():
     return render_template("register.html")
 
 
+# User - log in
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -80,6 +83,7 @@ def login():
     return render_template("login.html")
 
 
+# User - profile and cookie
 @app.route("/profile/<username>", methods=["GET", "POST"])
 def profile(username):
     username = mongo.db.users.find_one(
@@ -91,6 +95,7 @@ def profile(username):
     return redirect(url_for("login"))
 
 
+# User - log out
 @app.route("/logout")
 def logout():
     # remove user from session cookie
@@ -99,7 +104,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-# Create / insert
+# Task - insert
 @app.route("/add_task", methods=["GET", "POST"])
 def add_task():
     if request.method == "POST":
@@ -120,7 +125,7 @@ def add_task():
     return render_template("add_task.html", categories=categories)
 
 
-# Update / edit
+# Task - update / edit
 @app.route("/edit_task/<task_id>", methods=["GET", "POST"])
 def edit_task(task_id):
     if request.method == "POST":
@@ -141,7 +146,7 @@ def edit_task(task_id):
     return render_template("edit_task.html", task=task, categories=categories)
 
 
-# Delete / remove
+# Task - remove
 @app.route("/delete_task/<task_id>")
 def delete_task(task_id):
     mongo.db.tasks.remove({"_id": ObjectId(task_id)})
@@ -149,14 +154,14 @@ def delete_task(task_id):
     return redirect(url_for("get_tasks"))
 
 
-# Get / categories
+# Category - get, find, read
 @app.route("/get_categories")
 def get_categories():
     categories = list(mongo.db.categories.find().sort("category_name", 1))
     return render_template("categories.html", categories=categories)
 
 
-# Add / categories
+# Category - insert
 @app.route("/add_category", methods=["GET", "POST"])
 def add_category():
     if request.method == "POST":
@@ -170,6 +175,7 @@ def add_category():
     return render_template("add_category.html")
 
 
+# Category - update
 @app.route("/edit_category/<category_id>", methods=["GET", "POST"])
 def edit_category(category_id):
     if request.method == "POST":
@@ -184,6 +190,15 @@ def edit_category(category_id):
     return render_template("edit_category.html", category=category)
 
 
+# Category - delete
+@app.route("/delete_category/<category_id>")
+def delete_category(category_id):
+    mongo.db.categories.remove({"_id": ObjectId(category_id)})
+    flash("Category Successfully Deleted")
+    return redirect(url_for("get_categories"))
+
+
+# Executes application
 if __name__ == "__main__":
     app.run(host=os.environ.get("IP"),
             port=int(os.environ.get("PORT")),
